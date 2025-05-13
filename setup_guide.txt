@@ -1,0 +1,206 @@
+NOVA MOVIES - SETUP GUIDE
+=========================
+
+1. SYSTEM REQUIREMENTS
+---------------------
+* Python 3.8 or higher
+* MySQL 8.0 or higher
+* Operating System: Windows/Linux/MacOS
+* Internet connection (for movie posters)
+
+2. INSTALLATION STEPS
+--------------------
+
+STEP 1: Install Python
+---------------------
+1. Download Python: https://www.python.org/downloads/
+2. Run installer
+   - Check "Add Python to PATH"
+   - Check "Install pip"
+3. Verify in command prompt/terminal:
+   > python --version
+   > pip --version
+
+STEP 2: Install MySQL
+--------------------
+1. Download MySQL: https://dev.mysql.com/downloads/mysql/
+2. Run installer
+   - Choose "Developer Default"
+   - Set root password (remember it!)
+3. Verify installation:
+   > mysql --version
+
+STEP 3: Install Python Packages
+-----------------------------
+Run these commands in command prompt/terminal:
+
+> pip install mysql-connector-python
+> pip install pillow
+> pip install requests
+> pip install qrcode
+> pip install tkcalendar
+
+For Linux users, additional packages:
+> sudo apt-get install python3-tk
+> sudo apt-get install python3-pil python3-pil.imagetk
+
+For MacOS users:
+> brew install python-tk
+
+STEP 4: Project Setup
+--------------------
+1. Create project folder:
+   > mkdir nova_movies
+   > cd nova_movies
+
+2. Copy these files to the folder:
+   - nova_movie.py
+   - database.py
+   - login.py
+   - admin_panel.py
+
+3. Create tickets folder:
+   > mkdir tickets
+
+STEP 5: Configure Database
+-------------------------
+1. Open database.py in text editor
+2. Change MySQL password in TWO locations:
+
+   Location 1 - create_database_connection function:
+   connection = mysql.connect(
+       host="localhost",
+       user="root",
+       password="iamyash7.sql",  # CHANGE THIS
+       autocommit=True
+   )
+
+   Location 2 - get_db_connection function:
+   connection = mysql.connect(
+       host="localhost",
+       user="root",
+       password="iamyash7.sql",  # CHANGE THIS
+       database="nova_movie",
+       autocommit=True
+   )
+3. Make sure to use the same password in both locations
+
+STEP 6: Initialize Database
+--------------------------
+1. Run:
+   > python database.py
+2. Verify success message
+3. Default admin account will be created:
+   Username: kingsman
+   Password: iamyash
+
+STEP 7: Configure Paths
+----------------------
+1. Open nova_movie.py
+2. Find TICKET_SAVE_PATH
+3. Change to your tickets folder path:
+   TICKET_SAVE_PATH = "path/to/your/tickets/folder"
+
+STEP 8: Get OMDB API Key
+-----------------------
+1. Visit: http://www.omdbapi.com/apikey.aspx
+2. Get free API key
+3. Open nova_movie.py
+4. Find: api_key = "489d7a28"
+5. Replace with your API key
+
+STEP 9: Run Application
+----------------------
+1. Run:
+   > python nova_movie.py
+2. Login with admin account:
+   Username: kingsman
+   Password: iamyash
+
+TROUBLESHOOTING
+==============
+
+1. MySQL Connection Error
+------------------------
+* Verify MySQL is running
+* Check password in database.py
+* Ensure MySQL service is started
+
+Windows:
+> net start mysql80
+
+Linux:
+> sudo service mysql status
+
+MacOS:
+> brew services list
+
+2. Image Loading Issues
+----------------------
+* Check internet connection
+* Verify OMDB API key
+* Ensure PIL is installed correctly
+
+3. GUI Issues
+------------
+* Verify tkinter installation
+* Check Python version compatibility
+* Install required fonts
+
+4. Ticket Generation Error
+-------------------------
+* Check tickets folder permissions
+* Verify PIL installation
+* Ensure enough disk space
+
+MAINTENANCE
+==========
+
+1. Regular Updates
+-----------------
+> pip install --upgrade pillow mysql-connector-python
+
+2. Database Backup
+-----------------
+Export:
+> mysqldump -u root -p nova_movie > backup.sql
+
+Import:
+> mysql -u root -p nova_movie < backup.sql
+
+3. Clear Old Data
+----------------
+> python -c "import database; database.clear_old_seat_data()"
+
+SECURITY NOTES
+=============
+1. Change default admin password after first login
+2. Keep MySQL credentials secure
+3. Regular database backups
+4. Update Python packages regularly
+5. Monitor system logs
+
+FILE STRUCTURE
+=============
+nova_movies/
+├── nova_movie.py    (Main application)
+├── database.py      (Database operations)
+├── login.py         (Login system)
+├── admin_panel.py   (Admin interface)
+└── tickets/         (Generated tickets)
+
+MINIMUM SPECIFICATIONS
+====================
+* RAM: 4GB minimum
+* Storage: 1GB free space
+* Processor: Dual core
+* Screen Resolution: 1280x720 minimum
+* Internet: Broadband connection
+
+For additional help or issues:
+1. Check MySQL logs
+2. Verify Python environment
+3. Check file permissions
+4. Ensure all dependencies are installed
+
+END OF GUIDE 

@@ -1,0 +1,145 @@
+NOVA MOVIES DATABASE SCHEMA
+==========================
+
+
+MAIN PAGE FUNCTIONALITY
+======================
+- Movie Display: Shows up to 3 active movies with their details and booking status
+- User Access: Handles login/registration and maintains session state
+- Seat Selection: Manages 7x7 grid seat layout with real-time availability
+- Booking System: Processes ticket reservations and generates QR-coded tickets
+
+
+ADMIN PANEL - USER MANAGEMENT
+===========================
+- View complete user list with search and filter options (by username, role, registration date)
+- Add/Edit user details including role assignment and account status management
+- Reset user passwords and handle account recovery processes
+- Generate user activity reports and booking history analytics
+
+
+nm_users Table Details:
+- Stores all user account information including both customers and administrators
+- Implements role-based access control through the 'role' field (admin/customer)
+- Uses SHA-256 hashing for secure password storage with no plaintext passwords
+- Maintains unique usernames and tracks account creation time for auditing
+
+
+nm_movies Table Details:
+- Manages current and upcoming movie screenings with show times and pricing
+- Controls movie visibility through status field (active/inactive)
+- Limits system to 3 active movies at any given time
+- Automatically tracks creation time and handles movie scheduling
+
+
+nm_seats Table Details:
+- Handles all booking transactions and seat assignments
+- Prevents double booking through unique composite constraints
+- Maintains relationship between users, movies, and seat numbers
+- Uses A1-G7 format for clear seat identification in 7x7 grid
+
+1. USERS TABLE (nm_users)
+------------------------
+Column          Type           Constraints                        Description                    
+
+user_id        INT            PRIMARY KEY, NOT NULL              Unique identifier for each user, auto-increments
+name           VARCHAR(100)    NOT NULL                          User's complete name as per registration
+username       VARCHAR(50)     UNIQUE, NOT NULL                  Unique username for login, case-sensitive
+password       VARCHAR(255)    NOT NULL                          SHA-256 hashed password for security
+phone_number   VARCHAR(15)     NULL                             User's contact number with country code
+role           ENUM           NOT NULL, DEFAULT 'customer'       User type: 'admin' (full access) or 'customer'
+created_at     TIMESTAMP      DEFAULT CURRENT_TIMESTAMP          Date and time when account was created
+
+2. MOVIES TABLE (nm_movies)
+--------------------------
+Column          Type           Constraints                        Description                    
+
+movie_id       INT            PRIMARY KEY, NOT NULL              Unique identifier for each movie, auto-increments
+title          VARCHAR(100)    NOT NULL                          Full movie title as displayed to users
+genre          VARCHAR(50)     NULL                             Movie category (Action, Comedy, Drama, etc.)
+price          DECIMAL(10,2)   NOT NULL, CHECK (price > 0)      Ticket price in rupees (₹) with 2 decimal places
+show_date      DATE           NOT NULL                          Date of movie screening (YYYY-MM-DD)
+show_time      TIME           NOT NULL                          Scheduled show time in 24-hour format
+status         ENUM           NOT NULL, DEFAULT 'inactive'       Movie status: 'active' (bookable) or 'inactive'
+created_at     TIMESTAMP      DEFAULT CURRENT_TIMESTAMP          Date and time when movie was added to system
+
+3. SEATS TABLE (nm_seats)
+------------------------
+Column          Type           Constraints                        Description   
+
+seat_id        INT            PRIMARY KEY, NOT NULL              Unique identifier for each booking, auto-increments
+movie_id       INT            FOREIGN KEY, NOT NULL              References movie_id from nm_movies table
+user_id        INT            FOREIGN KEY, NOT NULL              References user_id from nm_users table
+seat_number    VARCHAR(3)     NOT NULL, CHECK (^[A-G][1-7]$)    Seat position in theater (A1-G7 format)
+booking_date   DATE           NOT NULL                           Date when booking was made (YYYY-MM-DD)
+
+UNIQUE INDEX: unique_seat (movie_id, seat_number, booking_date)
+
+RELATIONSHIPS EXPLAINED
+=====================
+1. nm_seats.movie_id -> nm_movies.movie_id:
+   - Each seat booking must be for a valid movie
+   - One movie can have multiple seat bookings
+   - When movie is deleted, all related bookings are removed
+
+2. nm_seats.user_id -> nm_users.user_id:
+   - Each booking must be linked to a registered user
+   - One user can book multiple seats
+   - When user is deleted, their bookings are removed
+
+UNIQUE CONSTRAINTS EXPLAINED
+==========================
+1. username in nm_users:
+   - No two users can have the same username
+   - Case-sensitive uniqueness
+   - Prevents duplicate accounts
+
+2. (movie_id, seat_number, booking_date) in nm_seats:
+   - Ensures same seat cannot be booked twice for same movie on same date
+   - Prevents double booking
+   - Allows same seat number for different movies/dates
+
+BUSINESS RULES
+=============
+1. Maximum Active Movies: 3 movies can be active at a time
+2. Seating Layout: 7x7 grid (49 seats per show)
+3. Show Timings: Fixed slots
+   - 10:00 AM
+   - 1:00 PM
+   - 4:00 PM
+   - 7:00 PM
+
+SEAT NAMING CONVENTION
+====================
+- Rows: A through G
+- Columns: 1 through 7
+- Format: [ROW][COLUMN] (e.g., A1, B3, G7)
+
+DATA FLOW
+=========
+1. User Registration/Login
+   User -> nm_users -> Authentication
+
+2. Movie Management (Admin)
+   Admin -> nm_movies -> Movie Listings
+
+3. Booking Process
+   User -> Select Movie -> Select Seats -> nm_seats -> Confirmation
+
+SECURITY FEATURES
+===============
+1. Password Hashing: SHA-256
+2. Role-based Access Control
+3. Unique Session Management
+
+MAINTENANCE
+==========
+1. Automatic date updates for active movies
+2. Clearing of old seat bookings
+3. Automatic status management
+
+DEFAULT ADMIN ACCOUNT
+===================
+Username: kingsman
+Password: iamyash
+Role: admin 
